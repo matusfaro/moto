@@ -1529,6 +1529,7 @@ def test_group_in_access_token():
     # A newly created user is forced to set a new password
     assert result["ChallengeName"] == "NEW_PASSWORD_REQUIRED"
     assert result["Session"] is not None
+    assert result["ChallengeParameters"]["USERNAME"] == username
 
     # This sets a new password and logs the user in (creates tokens)
     new_password = "P2$Sword"
@@ -1583,6 +1584,7 @@ def test_group_in_id_token():
     # A newly created user is forced to set a new password
     assert result["ChallengeName"] == "NEW_PASSWORD_REQUIRED"
     assert result["Session"] is not None
+    assert result["ChallengeParameters"]["USERNAME"] == username
 
     # This sets a new password and logs the user in (creates tokens)
     new_password = "P2$Sword"
@@ -2748,6 +2750,7 @@ def authentication_flow(conn, auth_flow):
     # A newly created user is forced to set a new password
     assert result["ChallengeName"] == "NEW_PASSWORD_REQUIRED"
     assert result["Session"] is not None
+    assert result["ChallengeParameters"]["USERNAME"] == username
 
     # This sets a new password and logs the user in (creates tokens)
     new_password = "P2$Sword"
@@ -3981,7 +3984,9 @@ def test_initiate_auth_USER_SRP_AUTH_with_username_attributes():
     client_id = conn.create_user_pool_client(
         UserPoolId=user_pool_id, ClientName=str(uuid.uuid4()), GenerateSecret=True
     )["UserPoolClient"]["ClientId"]
-    conn.sign_up(ClientId=client_id, Username=username, Password=password)
+    sign_up_result = conn.sign_up(
+        ClientId=client_id, Username=username, Password=password
+    )
     client_secret = conn.describe_user_pool_client(
         UserPoolId=user_pool_id, ClientId=client_id
     )["UserPoolClient"]["ClientSecret"]
@@ -4005,6 +4010,8 @@ def test_initiate_auth_USER_SRP_AUTH_with_username_attributes():
     )
 
     assert result["ChallengeName"] == "PASSWORD_VERIFIER"
+    # Asserting that username is the generated internal UserSub since we are using username with an email
+    assert result["ChallengeParameters"]["USERNAME"] == sign_up_result["UserSub"]
 
 
 @mock_cognitoidp
@@ -4408,6 +4415,7 @@ def test_admin_initiate_auth_when_token_totp_enabled():
     )
 
     assert result["ChallengeName"] == "SOFTWARE_TOKEN_MFA"
+    assert result["ChallengeParameters"]["USERNAME"] == username
     assert result["Session"] != ""
 
     # Respond to challenge with TOTP

@@ -1445,7 +1445,9 @@ class CognitoIdpBackend(BaseBackend):
 
                 return {
                     "ChallengeName": "NEW_PASSWORD_REQUIRED",
-                    "ChallengeParameters": {},
+                    "ChallengeParameters": {
+                        "USERNAME": user.username,
+                    },
                     "Session": session,
                 }
 
@@ -1458,7 +1460,9 @@ class CognitoIdpBackend(BaseBackend):
 
                 return {
                     "ChallengeName": "SOFTWARE_TOKEN_MFA",
-                    "ChallengeParameters": {},
+                    "ChallengeParameters": {
+                        "USERNAME": user.username,
+                    },
                     "Session": session,
                 }
 
@@ -1562,21 +1566,25 @@ class CognitoIdpBackend(BaseBackend):
                 return {
                     "ChallengeName": "SOFTWARE_TOKEN_MFA",
                     "Session": session,
-                    "ChallengeParameters": {},
+                    "ChallengeParameters": {
+                        "USERNAME": user.username,
+                    },
                 }
 
             if user.sms_mfa_enabled:
                 return {
                     "ChallengeName": "SMS_MFA",
                     "Session": session,
-                    "ChallengeParameters": {},
+                    "ChallengeParameters": {
+                        "USERNAME": user.username,
+                    },
                 }
 
             if user.status == UserStatus.FORCE_CHANGE_PASSWORD:
                 return {
                     "ChallengeName": "NEW_PASSWORD_REQUIRED",
                     "ChallengeParameters": {
-                        "USERNAME": username,
+                        "USERNAME": user.username,
                     },
                     "Session": session,
                 }
@@ -1935,7 +1943,9 @@ class CognitoIdpBackend(BaseBackend):
             if user.status is UserStatus.FORCE_CHANGE_PASSWORD:
                 return {
                     "ChallengeName": "NEW_PASSWORD_REQUIRED",
-                    "ChallengeParameters": {"USERNAME": user.username},
+                    "ChallengeParameters": {
+                        "USERNAME": user.username,
+                    },
                     "Session": session,
                 }
 
